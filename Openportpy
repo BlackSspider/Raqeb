@@ -1,0 +1,89 @@
+import customtkinter as ctk
+from tkinter import messagebox
+import socket
+
+# إعدادات الثيم النيوني الداكن
+ctk.set_appearance_mode("dark")
+
+class RaqebNeonPortChecker(ctk.CTk):
+    def __init__(self):
+        super().__init__()
+        
+        self.title("RAQEB | Neon Single Port Scanner")
+        self.geometry("500x600")
+        self.configure(fg_color="#010101") # خلفية داكنة جداً للتباين مع النيون
+        self.attributes("-alpha", 0.95) # تأثير الشفافية الزجاجي
+
+        self._build_neon_ui()
+
+    def _build_neon_ui(self):
+        # العنوان الرئيسي بتوهج أزرق (Neon Cyan)
+        self.lbl_title = ctk.CTkLabel(self, text="⚡ PORT ANALYZER ⚡", 
+                                      font=("Orbitron", 24, "bold"), text_color="#00f2ff")
+        self.lbl_title.pack(pady=(40, 10))
+
+        # إطار نيون زجاجي (Glass Frame)
+        self.main_frame = ctk.CTkFrame(self, fg_color="#0a0a0a", border_width=2, 
+                                       border_color="#00f2ff", corner_radius=20)
+        self.main_frame.pack(padx=40, pady=20, fill="both", expand=True)
+
+        # حقول الإدخال بتصميم عصري
+        ctk.CTkLabel(self.main_frame, text="TARGET IP", font=("Arial", 12, "bold"), text_color="#00f2ff").pack(pady=(25, 5))
+        self.ip_entry = ctk.CTkEntry(self.main_frame, width=320, height=40, 
+                                     placeholder_text="192.168.1.1", 
+                                     fg_color="#000", border_color="#333", text_color="#fff")
+        self.ip_entry.pack(pady=5)
+
+        ctk.CTkLabel(self.main_frame, text="TARGET PORT", font=("Arial", 12, "bold"), text_color="#00f2ff").pack(pady=(15, 5))
+        self.port_entry = ctk.CTkEntry(self.main_frame, width=320, height=40, 
+                                       placeholder_text="80", 
+                                       fg_color="#000", border_color="#333", text_color="#fff")
+        self.port_entry.pack(pady=5)
+
+        # زر الفحص بتوهج أخضر (Neon Green)
+        self.btn_scan = ctk.CTkButton(self.main_frame, text="RUN SCAN", 
+                                      fg_color="#2ecc71", hover_color="#27ae60",
+                                      text_color="black", font=("Orbitron", 14, "bold"),
+                                      height=45, width=200,
+                                      command=self.scan_logic)
+        self.btn_scan.pack(pady=40)
+
+        # الاسم الذهبي الملكي (Royal Gold) مع تفاعل الماوس
+        self.footer = ctk.CTkLabel(self, text="Developed by: Mowfag Adnan Abu Ras", 
+                                   font=("Times New Roman", 17, "bold", "italic"), 
+                                   text_color="#D4AF37")
+        self.footer.pack(side="bottom", pady=25)
+        
+        # ربط تأثير التوهج عند مرور الماوس على الاسم
+        self.footer.bind("<Enter>", lambda e: self.footer.configure(text_color="#FFF700"))
+        self.footer.bind("<Leave>", lambda e: self.footer.configure(text_color="#D4AF37"))
+        self.footer.configure(cursor="hand2")
+
+    def scan_logic(self):
+        target_ip = self.ip_entry.get().strip()
+        port_raw = self.port_entry.get().strip()
+
+        if not target_ip or not port_raw:
+            messagebox.showwarning("Input Error", "Missing Data!")
+            return
+
+        try:
+            port = int(port_raw)
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(1.5) # مهلة زمنية سريعة
+            
+            # محاولة الاتصال
+            if s.connect_ex((target_ip, port)) == 0:
+                messagebox.showinfo("Scanner Result", f"✔️ Port {port} is OPEN\nTarget: {target_ip}")
+            else:
+                messagebox.showerror("Scanner Result", f"❌ Port {port} is CLOSED\nTarget: {target_ip}")
+            s.close()
+            
+        except ValueError:
+            messagebox.showerror("Error", "Port must be a number!")
+        except Exception as e:
+            messagebox.showerror("System Error", str(e))
+
+if __name__ == "__main__":
+    app = RaqebNeonPortChecker()
+    app.mainloop()
